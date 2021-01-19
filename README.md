@@ -1,7 +1,7 @@
 # Making video thumbnails by template matching.
 
-* make a snapshot as 'tmpl.jpg' for find signature frame.
-* make make_thumbmail_all.sh for you.
+* make a snapshot as 'tmpl.jpg' for finding signature frame.
+* edit make_thumbmail_all.sh for you.
 
 ```bash
 $ pip install -r requirements.txt
