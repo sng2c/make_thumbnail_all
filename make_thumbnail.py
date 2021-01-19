@@ -5,13 +5,30 @@ import os
 
 import sys
 
-vpath = sys.argv[1]
+
+import argparse
+
+parser = argparse.ArgumentParser(description='Make video thumbnail by pattern matching.')
+parser.add_argument('video', metavar='PATH', type=str,
+                    help='Video Path')
+parser.add_argument('-force','-f', action='store_true', help='force rebuild')
+args = parser.parse_args()
+
+vpath = args.video
 (fname, ext) = os.path.splitext(vpath)
 spath = fname+'.smi'
 tpath = fname+'.jpg'
 
-if os.path.isfile(tpath):
+if os.path.isfile('tmp.smi'):
+    os.remove('tmp.smi')
+if os.path.isfile('tmp.ass'):
+    os.remove('tmp.ass')
+if os.path.isfile('tmp.jpg'):
+    os.remove('tmp.jpg')
+
+if (not args.force) and os.path.isfile(tpath):
 	exit()
+
 
 import chardet
 smi = open(spath, 'rb').read()
@@ -45,12 +62,14 @@ while success:
         break     
     success,image = video.read()
     frame_num += 1
+    if (frame_num / fps) > 10*60:
+        exit()
 
 t = (frame_num / fps) + delay
 cmd1 = f'iconv -f {smi_enc} \'{spath}\' > tmp.smi'
 cmd2 = f'ffmpeg -y -i tmp.smi tmp.ass'
-cmd3 = f'ffmpeg -y -ss {t} -copyts -i \'{vpath}\' -vf "subtitles=\'tmp.ass\':force_style=\'Fontsize=35\'" -vframes 1 tmp.jpg'
-cmd4 = f'ffmpeg -y -i tmp.jpg -vf scale=160:-1 \'{tpath}\''
+cmd3 = f'ffmpeg -y -ss {t} -copyts -i \'{vpath}\'  -vf "subtitles=\'tmp.ass\':force_style=\'Fontsize=40,Alignment=6\'" -vframes 1 tmp.jpg'
+cmd4 = f'ffmpeg -y -i tmp.jpg -vf scale=160:120 \'{tpath}\''
 print(cmd1)
 print(cmd2)
 print(cmd3)
@@ -59,6 +78,4 @@ os.system(cmd1)
 os.system(cmd2)
 os.system(cmd3)
 os.system(cmd4)
-os.remove('tmp.smi')
-os.remove('tmp.ass')
-os.remove('tmp.jpg')
+
